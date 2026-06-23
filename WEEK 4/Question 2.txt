@@ -1,0 +1,34 @@
+Part A — Process States (kernel/proc.h)
+The six process states in xv6 are: UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE. Note: The question says five states but the actual source code in kernel/proc.h has six — USED was added in the current MIT version.
+State right after fork() returns in the child: RUNNABLE — the child is ready to run but waiting for the scheduler to give it CPU time. This is set in the fork() function in kernel/proc.c.
+State between exit() and wait(): ZOMBIE — the process has finished but stays in the process table until the parent calls wait() to collect its exit status. After wait() collects it, the slot goes back to UNUSED.
+
+Part B — The Boot Process (kernel/main.c)
+Initialization steps in main() in order:
+  consoleinit() sets up the console 
+  printkinit() sets up kernel printing,  
+  kinit() sets up the physical memory allocator,
+  kvminit() creates the kernel page table,
+  kvminithart() turns on paging, 
+  procinit() sets up the process table,
+  trapinit() sets up trap vectors, 
+  trapinithart() installs the kernel trap vector, 
+  plicinit() sets up the interrupt controller, 
+  plicinithart() sets up device interrupts, 
+  binit() sets up the buffer cache, 
+  iinit() sets up the inode table, 
+  fileinit() sets up the file table,
+  virtio_disk_init() sets up the disk driver,
+  userinit() creates the very first user process.
+First subsystem initialized: consoleinit() — the console is initialized first 
+Last subsystem initialized: userinit() 
+What scheduler() does: scheduler() is an infinite loop that never returns. It continuously scans the process table looking for a RUNNABLE process, switches to it using swtch(), and when that process gives up the CPU, control returns to the scheduler which picks the next process. It runs forever for as long as the OS is alive. Found in kernel/proc.c.
+
+Part C — The System Call Table (kernel/syscall.c)
+Number of system calls xv6 supports: 21 system calls. Found in the syscalls[] array in kernel/syscall.c.
+Pattern between syscalls[] array and syscall.h: kernel/syscall.h defines each syscall with a number, for example SYS_fork is 1 and SYS_exit is 2. The syscalls[] array in syscall.c uses those exact same numbers as array indices so [SYS_fork] = sys_fork means slot 1 = fork and slot 2 = exit. The index in the array directly matches the syscall number so looking up a syscall by number is just a direct array access.
+What happens with an invalid syscall number: The syscall() function in kernel/syscall.c checks if the syscall number is valid. If it is not, it prints an error message and sets p->trapframe->a0 = -1.
+
+Part D — The Shell (user/sh.c)
+How the shell runs a command: When you type a command like ls, the shell calls fork() to create a child process. The child then calls exec() to completely replace itself with the requested program. The parent shell calls wait() to pause until the child finishes. Once the child exits, wait() returns and the shell prints the $ prompt again. Fork makes a copy of the shell, exec turns that copy into ls, and wait makes the shell pause until ls is done.
+What happens when you type ls | cat: The shell creates a pipe using pipe(), a one-way data channel with a read end and a write end. It then forks twice. Child 1 runs ls with its stdout redirected to the write end of the pipe instead of the screen. Child 2 runs cat with its stdin redirected to the read end of the pipe instead of the keyboard. Data flows automatically from ls through the pipe into cat and both processes run simultaneously. cat automatically receives whatever ls produces without either program knowing a pipe is involved.
