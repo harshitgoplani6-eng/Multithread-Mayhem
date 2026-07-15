@@ -1,0 +1,9 @@
+Here is how I added Syscount funtion 
+* **Creating the counter:** I started by adding a new variable called `syscalls` to the process structure (in `proc.h`). Think of this as a personal counter for each program, tracking how many times it asks the operating system to do something.
+* **Starting from zero:** To make sure the counter starts fresh, I updated the process setup code (in `proc.c`) so that whenever a new program starts, its `syscalls` counter is set to `0`.
+* **Giving it an ID number:** I gave our new system call a unique ID number. I defined `SYS_getsyscount` as `23` (in `syscall.h`) because 23 was the next available number in the list.
+* **Connecting it to the kernel:** I registered the system call in the main system call file (in `syscall.c`). I added a line to tell the system that `sys_getsyscount` exists, and I mapped it to its ID number (23) so the system knows which code to run when a program calls it.
+* **Doing the actual counting:** In that same file (`syscall.c`), I updated the system's main runner code. Now, every time *any* system call finishes running, it adds `1` to the program's counter. I put this increase *after* the call runs, which means `getsyscount` won't count itself in the final number it returns.
+* **Writing the actual action:** I wrote the actual code for our system call (in `sysproc.c`). It is very simple: it just looks at the program that is currently running and returns the number stored in its `syscalls` counter.
+* **Making it available to programs:** To let normal user programs use this new tool, I declared it in `user.h`. I also added it to `usys.pl`, which automatically builds the "bridge" (the assembly code) that lets a normal program safely jump into the kernel to run our code.
+* **Adding the test program:** Finally, I added the test program's name to the `Makefile` under the program list. This makes sure our test program compiles and is ready to run whenever we start xv6.
