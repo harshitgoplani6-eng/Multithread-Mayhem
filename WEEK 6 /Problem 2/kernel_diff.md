@@ -75,8 +75,8 @@ scheduler(void)
 Added two new syscall numbers at the bottom of the file after SYS_hello:
 
 ```
-#define SYS_set_priority 24
-#define SYS_get_priority 25
+#define SYS_set_priority 25
+#define SYS_get_priority 26
 ```
 
 
@@ -170,6 +170,3 @@ sys_get_priority(void)
   return -1;
 }
 ```
-## Did I preserve fairness for equal priority processes
-
-If two processes have the same priority number my scheduler picks whichever one it encounters first in the proc array during that scan. This means the process with the lower index in the array gets slightly more CPU time. It is not perfectly fair but it is close enough and the problem statement says documenting this is fine.
