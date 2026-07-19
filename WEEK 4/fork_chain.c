@@ -2,7 +2,7 @@
 #include "user/user.h"
 
 void indepth(int n , int Number){
-  if(n<=0){
+  if(n>=0){
   int parent_pid= getpid() ; 
   int pid = fork();
 
