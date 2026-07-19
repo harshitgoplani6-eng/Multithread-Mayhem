@@ -1,35 +1,3 @@
-/*
- * 02_race_counter.c
- *
- * The classic race condition demo.
- *
- * Two threads each increment a SHARED counter ITERS times.
- * If everything went well, the final value would be 2 * ITERS.
- * It usually won't be.
- *
- * Why? Because counter++ is not one operation. It's three:
- *     1. load counter from memory into a register
- *     2. add 1 to that register
- *     3. store the register's value back to memory
- *
- * Two threads running these three steps concurrently can interleave
- * such that both load the same value, both compute the same +1, and
- * both store back — effectively turning two increments into one.
- *
- * Compile:
- *   gcc -Wall -pthread 02_race_counter.c -o race_counter
- *
- * Run multiple times:
- *   ./race_counter
- *   ./race_counter
- *   ./race_counter
- *
- * Try also:
- *   - Increasing ITERS (e.g., to 100,000,000). The error gets bigger.
- *   - Compiling with optimization: gcc -O2 -pthread ... — different
- *     surprises can appear.
- */
-
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
